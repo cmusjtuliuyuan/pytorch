@@ -89,7 +89,8 @@ class Embedding(Module):
         self.reset_frequency(subsample, frequency)
         self.reset_parameters()
 
-    def reset_frequency(self, subsample, frequency):
+    def reset_frequency(self, scale_grad_by_freq, subsample, frequency):
+        self.scale_grad_by_freq = scale_grad_by_freq
         self.subsample = subsample
         if self.subsample:
             assert(frequency.size()[0] == self.num_embeddings)
