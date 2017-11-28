@@ -85,13 +85,17 @@ class Embedding(Module):
         self.scale_grad_by_freq = scale_grad_by_freq
         self.weight = Parameter(torch.Tensor(num_embeddings, embedding_dim))
         self.sparse = sparse
-        self.subsample = subsample
-        self.frequency = None
-        if self.subsample:
-            assert(frequency.size()[0] == num_embeddings)
-            self.frequency = frequency.unsqueeze(1).expand(num_embeddings, embedding_dim)
 
+        self.reset_frequency(subsample, frequency)
         self.reset_parameters()
+
+    def reset_frequency(self, subsample, frequency):
+        self.subsample = subsample
+        if self.subsample:
+            assert(frequency.size()[0] == self.num_embeddings)
+            self.frequency = frequency.unsqueeze(1).expand(self.num_embeddings, self.embedding_dim)
+        else:
+            self.frequency = None
 
     def reset_parameters(self):
         self.weight.data.normal_(0, 1)
