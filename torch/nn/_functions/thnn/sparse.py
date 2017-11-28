@@ -29,12 +29,14 @@ class Embedding(Function):
 
     @classmethod
     def forward(cls, ctx, indices, weight, padding_idx, max_norm, norm_type, scale_grad_by_freq,
-                sparse=False):
+                sparse=False, subsample=False, frequency=None):
 
         ctx.padding_idx = padding_idx
         ctx.scale_grad_by_freq = scale_grad_by_freq
         ctx._indices = None
         ctx.sparse = sparse
+        ctx.subsample = subsample
+        ctx.frequency = frequency
 
         assert indices.dim() <= 2
         assert not ctx.needs_input_grad[0], "Embedding doesn't " \
@@ -115,7 +117,10 @@ class Embedding(Function):
                 grad_output,
                 ctx._weight_size,
             )
-        return None, grad_weight, None, None, None, None, None
+        if ctx.subsample:
+            grad_weight = grad_weight * ctx.frequency
+
+        return None, grad_weight, None, None, None, None, None, None, None
 
 
 _all_functions.append(Embedding)
